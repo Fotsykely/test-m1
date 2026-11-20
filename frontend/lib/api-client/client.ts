@@ -2,7 +2,7 @@ import "server-only";
 import type { FieldErrors } from "./types";
 
 // The only place that talks HTTP to the ASP.NET Core API. Pages and Server Actions call the
-// functions of projects.ts and tasks.ts and never see fetch or status codes.
+// functions of rooms.ts and consumptions.ts and never see fetch or status codes.
 
 const REQUEST_TIMEOUT_MS = 5000;
 

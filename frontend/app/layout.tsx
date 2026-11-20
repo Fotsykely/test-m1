@@ -27,7 +27,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <header className="border-b border-border bg-surface">
           <div className="mx-auto flex w-full max-w-3xl items-center px-4 py-3">
             <Link href="/" className="text-lg font-semibold">
-              Mon application
+              Test-M1
             </Link>
           </div>
         </header>

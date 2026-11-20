@@ -27,22 +27,22 @@ describe("api client", () => {
   it("returns the parsed JSON body of a successful response", async () => {
     const fetchMock = stubFetch(jsonResponse([{ id: 1, name: "First" }]));
 
-    const items = await apiFetch<{ id: number; name: string }[]>("/api/items");
+    const rooms = await apiFetch<{ id: number; name: string }[]>("/api/rooms");
 
-    expect(items).toEqual([{ id: 1, name: "First" }]);
-    expect(fetchMock).toHaveBeenCalledWith("http://api.test/api/items", expect.anything());
+    expect(rooms).toEqual([{ id: 1, name: "First" }]);
+    expect(fetchMock).toHaveBeenCalledWith("http://api.test/api/rooms", expect.anything());
   });
 
   it("throws ApiNotFoundError on a 404", async () => {
     stubFetch(new Response(null, { status: 404 }));
 
-    await expect(apiFetch("/api/items/42")).rejects.toBeInstanceOf(ApiNotFoundError);
+    await expect(apiFetch("/api/rooms/42")).rejects.toBeInstanceOf(ApiNotFoundError);
   });
 
   it("throws ApiValidationError with camelCase field names on a 400", async () => {
     stubFetch(jsonResponse({ errors: { Name: ["Le nom est obligatoire."] } }, 400));
 
-    const error = await apiFetch("/api/items").catch((caught: unknown) => caught);
+    const error = await apiFetch("/api/rooms").catch((caught: unknown) => caught);
 
     expect(error).toBeInstanceOf(ApiValidationError);
     expect((error as ApiValidationError).fieldErrors).toEqual({ name: ["Le nom est obligatoire."] });
@@ -51,18 +51,18 @@ describe("api client", () => {
   it("throws a generic error on any other failure status", async () => {
     stubFetch(new Response(null, { status: 500 }));
 
-    await expect(apiFetch("/api/items")).rejects.toThrow("status 500");
+    await expect(apiFetch("/api/rooms")).rejects.toThrow("status 500");
   });
 
   it("accepts an empty 204 response when no body is expected", async () => {
     stubFetch(new Response(null, { status: 204 }));
 
-    await expect(apiFetchNoContent("/api/items/1", { method: "DELETE" })).resolves.toBeUndefined();
+    await expect(apiFetchNoContent("/api/rooms/1", { method: "DELETE" })).resolves.toBeUndefined();
   });
 
   it("fails clearly when API_BASE_URL is not set", async () => {
     vi.stubEnv("API_BASE_URL", "");
 
-    await expect(apiFetch("/api/items")).rejects.toThrow("API_BASE_URL is not set");
+    await expect(apiFetch("/api/rooms")).rejects.toThrow("API_BASE_URL is not set");
   });
 });

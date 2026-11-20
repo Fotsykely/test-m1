@@ -10,7 +10,7 @@ type ConfirmDeleteProps = {
   title: string;
   description: string;
   confirmLabel: string;
-  // Server Action bound to the id of the item to delete.
+  // Server Action bound to the id of the record to delete.
   action: (formData: FormData) => Promise<void>;
   // Icon-only trigger for compact rows; the label stays available to screen readers.
   iconOnly?: boolean;

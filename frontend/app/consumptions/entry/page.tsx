@@ -5,6 +5,7 @@ import { findConsumption } from "@/lib/api-client/consumptions";
 import { getRoom } from "@/lib/api-client/rooms";
 import { monthName, parseMonth, parseYear } from "@/lib/period";
 import { orNotFound, parseRouteId } from "@/lib/route-helpers";
+import { firstValue } from "@/lib/search-params";
 import { ConsumptionForm } from "./_components/consumption-form";
 import { saveConsumptionAction } from "./actions";
 
@@ -72,11 +73,6 @@ async function EntryContent({ searchParams }: { searchParams: EntryPageProps["se
       />
     </>
   );
-}
-
-// A query parameter is a string, a list when repeated, or missing.
-function firstValue(value: string | string[] | undefined): string {
-  return (Array.isArray(value) ? value[0] : value) ?? "";
 }
 
 // Same rough shape as the page (three lines, three fields and the buttons), so it does not jump.

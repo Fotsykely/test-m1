@@ -17,6 +17,9 @@ export interface Consumption {
   generatorKwh: number;
 }
 
+// Optional criteria of the entry list: they mirror the query parameters of GET /api/consumptions.
+export type ConsumptionFilter = { roomId?: number; month?: number; year?: number };
+
 // One row of the result table: the kWh of a room over every month entered.
 export interface RoomSummary {
   roomId: number;

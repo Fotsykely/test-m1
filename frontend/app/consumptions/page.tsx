@@ -3,30 +3,38 @@ import { Suspense } from "react";
 import { ButtonLink } from "@/components/button";
 import { ConfirmDelete } from "@/components/confirm-delete";
 import { listConsumptions } from "@/lib/api-client/consumptions";
+import { listRooms } from "@/lib/api-client/rooms";
 import type { Consumption } from "@/lib/api-client/types";
+import { filterKey, hasFilter, parseFilter } from "@/lib/consumption-filter";
 import { formatKwh } from "@/lib/format";
 import { monthName } from "@/lib/period";
 import { deleteConsumptionAction } from "./actions";
+import { ConsumptionFilterForm } from "./_components/consumption-filter-form";
 
 export const metadata: Metadata = { title: "Liste des saisies" };
 
-// The heading renders at once; the API is read in a child inside its own <Suspense> (see the README,
-// "Pièges Next.js 16").
-export default function ConsumptionsPage() {
+type ConsumptionsPageProps = PageProps<"/consumptions">;
+
+// The heading renders at once; the query string and the API are read in a child inside its own <Suspense>
+// (see the README, "Pièges Next.js 16").
+export default function ConsumptionsPage(props: ConsumptionsPageProps) {
   return (
     <>
       <h1 className="mb-6 text-2xl font-semibold">Liste des saisies</h1>
       <Suspense fallback={<ListSkeleton />}>
-        <ConsumptionList />
+        <ConsumptionList searchParams={props.searchParams} />
       </Suspense>
     </>
   );
 }
 
-async function ConsumptionList() {
-  const consumptions = await listConsumptions();
+async function ConsumptionList({ searchParams }: { searchParams: ConsumptionsPageProps["searchParams"] }) {
+  const filter = parseFilter(await searchParams);
+  const filtered = hasFilter(filter);
+  const [rooms, consumptions] = await Promise.all([listRooms(), listConsumptions(filter)]);
 
-  if (consumptions.length === 0) {
+  // Nothing entered at all: there is nothing to filter yet.
+  if (consumptions.length === 0 && !filtered) {
     return (
       <div className="flex flex-col items-start gap-4 rounded-lg border border-dashed border-border-input p-6">
         <p className="text-muted-foreground">Aucune saisie pour le moment.</p>
@@ -35,6 +43,23 @@ async function ConsumptionList() {
     );
   }
 
+  return (
+    <>
+      {/* The key gives each set of criteria its own form: when the URL changes through the app, the fields
+          show the new criteria instead of what was typed before. */}
+      <ConsumptionFilterForm key={filterKey(filter)} rooms={rooms} filter={filter} />
+      {consumptions.length === 0 ? (
+        <p className="rounded-lg border border-dashed border-border-input p-6 text-muted-foreground">
+          Aucune saisie pour ce filtre.
+        </p>
+      ) : (
+        <ConsumptionTable consumptions={consumptions} />
+      )}
+    </>
+  );
+}
+
+function ConsumptionTable({ consumptions }: { consumptions: Consumption[] }) {
   // "relative" makes this box the containing block of the absolutely positioned sr-only texts of the rows:
   // without it they escape the scroll area and widen the whole page on a phone.
   return (

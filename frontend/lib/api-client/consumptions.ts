@@ -1,5 +1,5 @@
 import { apiFetch, apiFetchNoContent, jsonRequest } from "./client";
-import type { Consumption, ConsumptionValues, NewConsumption, RoomSummary } from "./types";
+import type { Consumption, ConsumptionFilter, ConsumptionValues, NewConsumption, RoomSummary } from "./types";
 
 // The entry of a room for a month, or null when none has been saved yet (there is at most one).
 export async function findConsumption(roomId: number, month: number, year: number): Promise<Consumption | null> {
@@ -18,9 +18,15 @@ export function updateConsumption(id: number, values: ConsumptionValues): Promis
   return apiFetch<Consumption>(`/api/consumptions/${id}`, jsonRequest("PUT", values));
 }
 
-// Every entry, newest period first.
-export function listConsumptions(): Promise<Consumption[]> {
-  return apiFetch<Consumption[]>("/api/consumptions");
+// The entries, newest period first. Without criteria, every entry.
+export function listConsumptions(filter: ConsumptionFilter = {}): Promise<Consumption[]> {
+  const query = new URLSearchParams();
+  if (filter.roomId !== undefined) query.set("roomId", String(filter.roomId));
+  if (filter.month !== undefined) query.set("month", String(filter.month));
+  if (filter.year !== undefined) query.set("year", String(filter.year));
+
+  const queryString = query.toString();
+  return apiFetch<Consumption[]>(`/api/consumptions${queryString ? `?${queryString}` : ""}`);
 }
 
 // Throws ApiNotFoundError when the entry does not exist (anymore).

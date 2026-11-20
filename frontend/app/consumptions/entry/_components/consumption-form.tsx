@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { ButtonLink } from "@/components/button";
+// import { ButtonLink } from "@/components/button"; // "Annuler" (hidden)
 import { FormError, InputField } from "@/components/field";
 import { SubmitButton } from "@/components/submit-button";
 import { INITIAL_FORM_STATE, type FormState } from "@/lib/form-state";
@@ -15,7 +15,7 @@ type ConsumptionFormProps = {
 
 // The API validates; this form only displays the messages it sends back under the matching field
 // (noValidate turns the browser's own checks off).
-export function ConsumptionForm({ action, initialValues, cancelHref }: ConsumptionFormProps) {
+export function ConsumptionForm({ action, initialValues }: ConsumptionFormProps) {
   const [state, formAction] = useActionState(action, INITIAL_FORM_STATE);
 
   const values = state.status === "error" ? state.values : initialValues;
@@ -36,9 +36,12 @@ export function ConsumptionForm({ action, initialValues, cancelHref }: Consumpti
 
       <div className="flex flex-wrap gap-3">
         <SubmitButton>Valider</SubmitButton>
+        {/* "Annuler" (hidden): the subject's entry screen only has "Valider". To show it again, uncomment this
+            button, the ButtonLink import, and add cancelHref back to the destructured props.
         <ButtonLink href={cancelHref} variant="secondary">
           Annuler
         </ButtonLink>
+        */}
       </div>
     </form>
   );

@@ -3,13 +3,13 @@ import { Suspense } from "react";
 import { ButtonLink } from "@/components/button";
 import { ConfirmDelete } from "@/components/confirm-delete";
 import { listConsumptions } from "@/lib/api-client/consumptions";
-import { listRooms } from "@/lib/api-client/rooms";
+// import { listRooms } from "@/lib/api-client/rooms"; // filter (hidden)
 import type { Consumption } from "@/lib/api-client/types";
-import { filterKey, hasFilter, parseFilter } from "@/lib/consumption-filter";
+import { hasFilter, parseFilter } from "@/lib/consumption-filter"; // + filterKey for the filter (hidden)
 import { formatKwh } from "@/lib/format";
 import { monthName } from "@/lib/period";
 import { deleteConsumptionAction } from "./actions";
-import { ConsumptionFilterForm } from "./_components/consumption-filter-form";
+// import { ConsumptionFilterForm } from "./_components/consumption-filter-form"; // filter (hidden)
 
 export const metadata: Metadata = { title: "Liste des saisies" };
 
@@ -31,7 +31,8 @@ export default function ConsumptionsPage(props: ConsumptionsPageProps) {
 async function ConsumptionList({ searchParams }: { searchParams: ConsumptionsPageProps["searchParams"] }) {
   const filter = parseFilter(await searchParams);
   const filtered = hasFilter(filter);
-  const [rooms, consumptions] = await Promise.all([listRooms(), listConsumptions(filter)]);
+  const consumptions = await listConsumptions(filter);
+  // filter (hidden): const [rooms, consumptions] = await Promise.all([listRooms(), listConsumptions(filter)]);
 
   // Nothing entered at all: there is nothing to filter yet.
   if (consumptions.length === 0 && !filtered) {
@@ -45,9 +46,12 @@ async function ConsumptionList({ searchParams }: { searchParams: ConsumptionsPag
 
   return (
     <>
-      {/* The key gives each set of criteria its own form: when the URL changes through the app, the fields
-          show the new criteria instead of what was typed before. */}
+      {/* Filter (hidden): the subject's list screen has none. To show it again, uncomment the lines marked
+          "filter (hidden)" (the two imports, the fetch above and filterKey in the lib import) and this form.
+          The key gives each set of criteria its own form: when the URL changes through the app, the fields
+          show the new criteria instead of what was typed before.
       <ConsumptionFilterForm key={filterKey(filter)} rooms={rooms} filter={filter} />
+      */}
       {consumptions.length === 0 ? (
         <p className="rounded-lg border border-dashed border-border-input p-6 text-muted-foreground">
           Aucune saisie pour ce filtre.

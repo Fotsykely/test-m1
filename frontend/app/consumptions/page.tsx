@@ -98,7 +98,7 @@ function ConsumptionRow({ consumption }: { consumption: Consumption }) {
   return (
     <tr className="border-t border-border first:border-t-0">
       <th scope="row" className="px-4 py-2 font-medium">{consumption.roomName}</th>
-      <td className="px-4 py-2">{period}</td>
+      <td className="whitespace-nowrap px-4 py-2">{period}</td>
       <td className="px-4 py-2 text-right">{formatKwh(consumption.jiramaKwh)}</td>
       <td className="px-4 py-2 text-right">{formatKwh(consumption.solarKwh)}</td>
       <td className="px-4 py-2 text-right">{formatKwh(consumption.generatorKwh)}</td>

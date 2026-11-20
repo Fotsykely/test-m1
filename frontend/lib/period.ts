@@ -43,3 +43,13 @@ export function parseYear(text: string): number | null {
   const year = Number(trimmed);
   return year >= YEAR_MIN && year <= YEAR_MAX ? year : null;
 }
+
+// Year select (not used yet): to offer the years in a <select> instead of a number field, build the list
+// from the current year, most recent first, then show it with years.map(...) like MONTHS.map(...).
+//
+// export function yearOptions(currentYear: number, before = 5): number[] {
+//   return Array.from({ length: before + 2 }, (_, index) => currentYear + 1 - index);
+// }
+//
+// Example: yearOptions(2026) gives [2027, 2026, 2025, 2024, 2023, 2022, 2021].
+// In room-picker.tsx: const years = yearOptions(defaultYear);

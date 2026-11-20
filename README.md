@@ -80,6 +80,13 @@ frontend/
   app/                  pages et Server Actions
 ```
 
+### Pages du front
+
+| Route | Rôle |
+|---|---|
+| `/` | liste des salles : on choisit le mois (par défaut le mois courant) et l'année, puis « Saisir » sur la salle voulue |
+| `/consumptions/entry?roomId=&month=&year=` | saisie des trois consommations (kWh) d'une salle pour un mois. Si la salle a déjà une saisie ce mois-là, le formulaire est pré-rempli et « Valider » la remplace. Un lien modifié à la main (salle inconnue, mois 13…) mène à « Page introuvable » |
+
 ### Points d'entrée de l'API
 
 | Méthode | Route | Rôle |

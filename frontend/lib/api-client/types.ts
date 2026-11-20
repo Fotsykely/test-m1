@@ -6,5 +6,26 @@ export interface Room {
   name: string;
 }
 
+export interface Consumption {
+  id: number;
+  roomId: number;
+  roomName: string;
+  year: number;
+  month: number; // 1 to 12
+  jiramaKwh: number;
+  solarKwh: number;
+  generatorKwh: number;
+}
+
+// The three kWh values of an entry. null when a field was left empty: the API then says it is required.
+export type ConsumptionValues = {
+  jiramaKwh: number | null;
+  solarKwh: number | null;
+  generatorKwh: number | null;
+};
+
+// Request body to create an entry. Once created, only the values can change.
+export type NewConsumption = ConsumptionValues & { roomId: number; year: number; month: number };
+
 // Validation messages per form field, with camelCase field names: { name: ["Le nom est obligatoire."] }
 export type FieldErrors = Record<string, string[]>;

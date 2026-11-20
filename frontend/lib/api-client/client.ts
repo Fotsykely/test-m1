@@ -20,6 +20,14 @@ export class ApiNotFoundError extends Error {
   }
 }
 
+// The data conflicts with what is stored (409): for example an entry that already exists for the room and month.
+export class ApiConflictError extends Error {
+  constructor() {
+    super("The request conflicts with the stored data.");
+    this.name = "ApiConflictError";
+  }
+}
+
 // Reads a JSON response (GET, POST, PUT).
 export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   const response = await sendRequest(path, init);
@@ -46,6 +54,7 @@ async function sendRequest(path: string, init: RequestInit): Promise<Response> {
   if (response.ok) return response;
   if (response.status === 404) throw new ApiNotFoundError();
   if (response.status === 400) throw new ApiValidationError(await readFieldErrors(response));
+  if (response.status === 409) throw new ApiConflictError();
   throw new Error(`The API answered with status ${response.status}.`);
 }
 

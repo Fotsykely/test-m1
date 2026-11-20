@@ -21,6 +21,20 @@ const MONTH_NAMES = [
 // Month numbers are 1 to 12, as the API expects them.
 export const MONTHS = MONTH_NAMES.map((name, index) => ({ number: index + 1, name }));
 
+// Name of a month number between 1 and 12.
+export function monthName(month: number): string {
+  return MONTH_NAMES[month - 1];
+}
+
+// The month number when the text is a whole number from 1 to 12, otherwise null.
+export function parseMonth(text: string): number | null {
+  const trimmed = text.trim();
+  if (!/^\d{1,2}$/.test(trimmed)) return null;
+
+  const month = Number(trimmed);
+  return month >= 1 && month <= 12 ? month : null;
+}
+
 // The year when the text is a four-digit number within the limits of the API, otherwise null.
 export function parseYear(text: string): number | null {
   const trimmed = text.trim();

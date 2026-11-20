@@ -73,7 +73,7 @@ export function RoomPicker({ rooms, defaultMonth, defaultYear }: RoomPickerProps
                 ) : (
                   <ButtonLink
                     variant="secondary"
-                    href={`/consumptions/new?roomId=${room.id}&month=${month}&year=${year}`}
+                    href={`/consumptions/entry?roomId=${room.id}&month=${month}&year=${year}`}
                   >
                     Saisir<span className="sr-only"> pour {room.name}</span>
                   </ButtonLink>

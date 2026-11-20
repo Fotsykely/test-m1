@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ApiNotFoundError, ApiValidationError, apiFetch, apiFetchNoContent } from "./client";
+import { ApiConflictError, ApiNotFoundError, ApiValidationError, apiFetch, apiFetchNoContent } from "./client";
 
 // "server-only" throws when imported outside a Server Component: replace it with an empty module.
 vi.mock("server-only", () => ({}));
@@ -46,6 +46,12 @@ describe("api client", () => {
 
     expect(error).toBeInstanceOf(ApiValidationError);
     expect((error as ApiValidationError).fieldErrors).toEqual({ name: ["Le nom est obligatoire."] });
+  });
+
+  it("throws ApiConflictError on a 409", async () => {
+    stubFetch(new Response(null, { status: 409 }));
+
+    await expect(apiFetch("/api/consumptions", { method: "POST" })).rejects.toBeInstanceOf(ApiConflictError);
   });
 
   it("throws a generic error on any other failure status", async () => {

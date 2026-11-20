@@ -11,6 +11,27 @@ public class ConsumptionValuesRequestDto
     private decimal? _solarKwh;
     private decimal? _generatorKwh;
 
+    // How to change the kWh rules (nothing below is active, it is a reminder):
+    //
+    // The API validates, the form only shows its messages. Today: no negative value ([Range] starts at 0.0),
+    // one maximum for the three energies (Consumption.KwhMax), and values rounded to 2 decimals
+    // (RoundToStoredPrecision, matching HasPrecision(12, 2) in AppDbContext).
+    //
+    // - Allow negative values: lower the first bound of the three [Range] (for example -Consumption.KwhMax, or a
+    //   new Consumption.KwhMin) and reword the three messages. Update the test that sends jiramaKwh = -1 and
+    //   expects a 400 (ConsumptionsEndpointsTests). lib/kwh.ts in the front already accepts a "-".
+    // - Refuse more than 2 decimals instead of rounding: remove RoundToStoredPrecision from the three setters and
+    //   add a rule that rejects them (a [RegularExpression] or a custom attribute). The test expecting 10.13
+    //   from 10.129 must change too.
+    // - Whole numbers only: same rule in the API, plus /^-?\d+$/ in parseKwh (front) for faster feedback, and
+    //   HasPrecision(12, 0) in AppDbContext, which needs a migration.
+    // - More than 2 decimals: change HasPrecision (migration) and the 2 in Math.Round.
+    // - A maximum per energy: replace KwhMax in Consumption.cs by JiramaKwhMax, SolarKwhMax and GeneratorKwhMax,
+    //   use each one in its own [Range] (the {1} and {2} of the messages follow), grep KwhMax for other uses,
+    //   and add one test per energy (a value just above the maximum gives a 400 on the right field).
+    //
+    // Changing only bounds needs no migration: the database is touched only when the precision changes.
+
     [Required(ErrorMessage = "La consommation Jirama est obligatoire.")]
     [Range(0.0, (double)Consumption.KwhMax,
         ErrorMessage = "La consommation Jirama doit être comprise entre {1} et {2} kWh.")]

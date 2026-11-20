@@ -17,6 +17,16 @@ export interface Consumption {
   generatorKwh: number;
 }
 
+// One row of the result table: the kWh of a room over every month entered.
+export interface RoomSummary {
+  roomId: number;
+  roomName: string;
+  jiramaKwh: number;
+  solarKwh: number;
+  generatorKwh: number;
+  totalKwh: number;
+}
+
 // The three kWh values of an entry. null when a field was left empty: the API then says it is required.
 export type ConsumptionValues = {
   jiramaKwh: number | null;

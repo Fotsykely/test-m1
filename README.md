@@ -87,6 +87,7 @@ frontend/
 | `/` | liste des salles : on choisit le mois (par défaut le mois courant) et l'année, puis « Saisir » sur la salle voulue |
 | `/consumptions/entry?roomId=&month=&year=` | saisie des trois consommations (kWh) d'une salle pour un mois. Si la salle a déjà une saisie ce mois-là, le formulaire est pré-rempli et « Valider » la remplace. Un lien modifié à la main (salle inconnue, mois 13…) mène à « Page introuvable ». « Valider » renvoie vers la liste |
 | `/consumptions` | liste des saisies (la plus récente d'abord) : kWh par énergie, « Modifier » (rouvre la page de saisie pré-remplie) et « Supprimer » (avec confirmation) |
+| `/results` | résultat : une ligne par salle (les 6, avec des zéros si rien n'est saisi), kWh de chaque énergie et total, tous les mois saisis confondus |
 
 ### Points d'entrée de l'API
 

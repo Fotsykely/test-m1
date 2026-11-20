@@ -1,5 +1,5 @@
 import { apiFetch, apiFetchNoContent, jsonRequest } from "./client";
-import type { Consumption, ConsumptionValues, NewConsumption } from "./types";
+import type { Consumption, ConsumptionValues, NewConsumption, RoomSummary } from "./types";
 
 // The entry of a room for a month, or null when none has been saved yet (there is at most one).
 export async function findConsumption(roomId: number, month: number, year: number): Promise<Consumption | null> {
@@ -26,4 +26,9 @@ export function listConsumptions(): Promise<Consumption[]> {
 // Throws ApiNotFoundError when the entry does not exist (anymore).
 export function deleteConsumption(id: number): Promise<void> {
   return apiFetchNoContent(`/api/consumptions/${id}`, { method: "DELETE" });
+}
+
+// One row per room, with its kWh summed over every month entered (zeros for a room without entry).
+export function listRoomSummaries(): Promise<RoomSummary[]> {
+  return apiFetch<RoomSummary[]>("/api/consumptions/summary");
 }

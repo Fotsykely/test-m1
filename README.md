@@ -4,8 +4,6 @@ Application de suivi de la consommation énergétique (kWh) des salles d'un camp
 
 Stack : **Next.js 16** (front), **ASP.NET Core / .NET 10** (API), MySQL 8.4 (EF Core 9 + Pomelo). Le projet part du template [next-dotnet-template](https://github.com/Fotsykely/next-dotnet-template) (branche `mysql`), dont la documentation technique suit.
 
-Il contient pour l'instant le CRUD d'exemple du template (`Item`), qui montre le chemin complet : base de données → API → `lib/api-client` → pages Next.js. Il sera supprimé quand les vraies entités seront en place.
-
 ## Utiliser ce template
 
 - **Sur GitHub** : bouton « Use this template » (si le dépôt est marqué *Template repository* dans ses réglages).
@@ -38,7 +36,7 @@ dotnet user-secrets set "ConnectionStrings:Default" "Server=localhost;Port=3307;
 dotnet run                  # http://localhost:5080
 ```
 
-Au démarrage, l'API applique les migrations puis insère trois éléments de démonstration si la table est vide. La chaîne de connexion n'est jamais dans le code : elle vient des *user secrets* en développement, ou de la variable d'environnement `ConnectionStrings__Default` ailleurs. Le port et le mot de passe doivent correspondre à votre `.env`.
+Au démarrage, l'API applique les migrations, qui insèrent les 6 salles du sujet. La chaîne de connexion n'est jamais dans le code : elle vient des *user secrets* en développement, ou de la variable d'environnement `ConnectionStrings__Default` ailleurs. Le port et le mot de passe doivent correspondre à votre `.env`.
 
 > Au tout premier démarrage, le journal affiche un `fail: … SELECT "MigrationId" … FROM "__EFMigrationsHistory"`. C'est normal : EF lit la table d'historique avant qu'elle existe, puis applique la migration.
 
@@ -86,30 +84,35 @@ frontend/
 
 | Méthode | Route | Rôle |
 |---|---|---|
-| GET | `/api/items` | liste |
-| GET | `/api/items/{id}` | détail (404 si inconnu) |
-| POST | `/api/items` | création (400 + erreurs par champ si invalide) |
-| PUT | `/api/items/{id}` | modification |
-| DELETE | `/api/items/{id}` | suppression (204, ou 404) |
+| GET | `/api/rooms` | les 6 salles du sujet, dans l'ordre (lecture seule) |
+| GET | `/api/rooms/{id}` | une salle (404 si inconnue) |
+| GET | `/api/consumptions` | saisies, filtres optionnels `roomId`, `year`, `month` ; période la plus récente d'abord |
+| GET | `/api/consumptions/summary` | résultat : une ligne par salle, avec le total kWh de chaque énergie sur tous les mois saisis, et le total général (0 pour une salle sans saisie) |
+| GET | `/api/consumptions/{id}` | une saisie (404 si inconnue) |
+| POST | `/api/consumptions` | création : `roomId`, `year`, `month`, `jiramaKwh`, `solarKwh`, `generatorKwh` (400 par champ, 409 si la salle a déjà une saisie ce mois-là) |
+| PUT | `/api/consumptions/{id}` | modification des trois valeurs kWh uniquement (salle, mois et année ne changent pas) |
+| DELETE | `/api/consumptions/{id}` | suppression (204, ou 404) |
 | GET | `/health` | santé de l'API et de la base |
+
+Une saisie = une salle × un mois × une année, avec une colonne par type d'énergie. Les valeurs sont en kWh, positives ou nulles, arrondies à 2 décimales.
 
 Les erreurs non gérées et les statuts nus (404, 405…) répondent en `ProblemDetails` (JSON).
 
 ### Le client d'API (`frontend/lib/api-client`)
 
 - `client.ts` est le **seul** endroit qui fait du `fetch`. Il traduit les statuts HTTP en erreurs typées : 404 → `ApiNotFoundError`, 400 → `ApiValidationError` (noms de champs en camelCase), autre → `Error`. Délai maximum de 5 s.
-- `items.ts` expose une fonction par endpoint. Les pages et les Server Actions n'appellent que ces fonctions.
+- Un fichier par ressource (`rooms.ts`, `consumptions.ts`…) expose une fonction par endpoint. Les pages et les Server Actions n'appellent que ces fonctions.
 - `types.ts` reproduit à la main les DTOs de l'API. Quand un DTO change côté .NET, mettez à jour le type correspondant.
 - Les composants client ne font jamais de requête : ils reçoivent leurs données ou appellent une Server Action.
 
 ## Ajouter une entité
 
-Exemple : `Product`. Suivez le chemin d'`Item`.
+Exemple : `Product`. Suivez le chemin de `Consumption` côté API.
 
 1. **Entité** : `backend/Api/Entities/Product.cs` (les longueurs max en `const`, partagées par EF et la validation).
 2. **DbContext** : ajoutez un `DbSet<Product>` et la configuration dans `OnModelCreating`.
 3. **DTOs** : `backend/Api/Dtos/ProductDtos.cs` (requête avec DataAnnotations, réponse en `record`).
-4. **Contrôleur** : `ProductsController`, calqué sur `ItemsController`.
+4. **Contrôleur** : `ProductsController`, calqué sur `ConsumptionsController`.
 5. **Migration** (depuis `backend/`) :
    ```bash
    dotnet tool restore
@@ -118,10 +121,8 @@ Exemple : `Product`. Suivez le chemin d'`Item`.
    Le `dotnet ef` a besoin d'une chaîne de connexion pour construire l'application : exportez `ConnectionStrings__Default` si vous n'avez pas de *user secret*.
 
    Branche `mysql` : le projet reste en `net10.0`, mais les paquets EF Core sont en `9.*` car Pomelo n'a pas de version pour EF Core 10. L'outil `dotnet-ef` est donc en 9.0.23 (avec `rollForward`), et `MySqlConnector` est épinglé en 2.6.2 (la 2.4.0 tirée par Pomelo a une vulnérabilité connue).
-6. **Front** : type dans `lib/api-client/types.ts`, fonctions dans `lib/api-client/products.ts`, Server Actions dans `app/products/actions.ts`, formulaire et pages sur le modèle de `item-form.tsx` et `app/items/`.
-7. **Tests** : un fichier `ProductsEndpointsTests.cs` sur le modèle de `ItemsEndpointsTests.cs`.
-
-Pour **supprimer l'exemple** : retirez les fichiers `Item*` du back (et la migration `InitialCreate`, à régénérer), puis `lib/api-client/items.ts`, `components/item-form.tsx`, `app/items/`, `app/_components/item-row.tsx` et le contenu de `app/page.tsx`.
+6. **Front** : type dans `lib/api-client/types.ts`, fonctions dans `lib/api-client/products.ts`, Server Actions dans `app/products/actions.ts`, formulaire et pages dans `app/products/`.
+7. **Tests** : un fichier `ProductsEndpointsTests.cs` sur le modèle de `ConsumptionsEndpointsTests.cs`.
 
 ## Renommer le projet
 
@@ -139,7 +140,7 @@ Côté front : le nom de l'application est dans `app/layout.tsx` (métadonnées 
 
 `next.config.ts` active `cacheComponents` et `partialPrefetching`. Conséquences :
 
-- **Toute lecture de l'API doit être sous une frontière `<Suspense>`.** Le `loading.tsx` racine couvre les pages de premier niveau, mais pas une navigation client vers une route imbriquée : le layout racine est déjà monté. La page d'édition (`app/items/[itemId]/edit/page.tsx`) affiche donc son titre tout de suite et lit `params` puis appelle l'API dans un composant enfant, dans son propre `<Suspense>`. Sans cela, `next dev` affiche *« encountered uncached data during prerendering or a navigation »*.
+- **Toute lecture de l'API doit être sous une frontière `<Suspense>`.** Le `loading.tsx` racine couvre les pages de premier niveau, mais pas une navigation client vers une route imbriquée : le layout racine est déjà monté. Une page d'édition imbriquée (par exemple `app/<ressource>/[id]/edit/page.tsx`) doit donc afficher son titre tout de suite et lit `params` puis appelle l'API dans un composant enfant, dans son propre `<Suspense>`. Sans cela, `next dev` affiche *« encountered uncached data during prerendering or a navigation »*.
 - `params` est une promesse : `await props.params`.
 - `error.tsx` reçoit la prop `retry` (et non `reset`).
 - `redirect()` fonctionne en levant une exception : appelez-le **hors** des `try/catch`.

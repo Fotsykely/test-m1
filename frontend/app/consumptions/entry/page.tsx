@@ -57,7 +57,11 @@ async function EntryContent({ searchParams }: { searchParams: EntryPageProps["se
         </p>
       )}
 
+      {/* The key gives each room and month its own form. Without it, moving to another month through the app
+          reuses the same form: what was typed stays on screen (the inputs only take their default value
+          once) and so does an error message. */}
       <ConsumptionForm
+        key={`${roomId}-${year}-${month}`}
         action={saveConsumptionAction.bind(null, { roomId, month, year, consumptionId: existing?.id ?? null })}
         initialValues={{
           jiramaKwh: existing ? String(existing.jiramaKwh) : "",

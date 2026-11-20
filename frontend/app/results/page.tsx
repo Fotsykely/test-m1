@@ -26,7 +26,7 @@ async function ResultsTable() {
   const summaries = await listRoomSummaries();
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-border bg-surface shadow-sm">
+    <div className="relative overflow-x-auto rounded-lg border border-border bg-surface shadow-sm">
       <table className="w-full min-w-[36rem] text-left">
         <caption className="sr-only">Consommation totale en kWh par salle et par type d&apos;énergie</caption>
         <thead className="border-b border-border bg-background text-sm text-muted-foreground">

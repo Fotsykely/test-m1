@@ -35,8 +35,10 @@ async function ConsumptionList() {
     );
   }
 
+  // "relative" makes this box the containing block of the absolutely positioned sr-only texts of the rows:
+  // without it they escape the scroll area and widen the whole page on a phone.
   return (
-    <div className="overflow-x-auto rounded-lg border border-border bg-surface shadow-sm">
+    <div className="relative overflow-x-auto rounded-lg border border-border bg-surface shadow-sm">
       <table className="w-full min-w-[44rem] text-left">
         <caption className="sr-only">Consommation en kWh par salle et par mois</caption>
         <thead className="border-b border-border bg-background text-sm text-muted-foreground">

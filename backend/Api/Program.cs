@@ -25,12 +25,11 @@ builder.Services.AddHealthChecks().AddDbContextCheck<AppDbContext>();
 
 var app = builder.Build();
 
-// On startup: create or update the schema (migrations), then load the demo data if the database is empty.
+// On startup: create or update the schema (migrations). The rooms are inserted by a migration.
 await using (var scope = app.Services.CreateAsyncScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await db.Database.MigrateAsync();
-    await DemoDataSeeder.SeedAsync(db);
 }
 
 app.UseExceptionHandler();

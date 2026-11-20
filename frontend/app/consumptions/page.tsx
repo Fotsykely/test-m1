@@ -1,0 +1,110 @@
+import type { Metadata } from "next";
+import { Suspense } from "react";
+import { ButtonLink } from "@/components/button";
+import { ConfirmDelete } from "@/components/confirm-delete";
+import { listConsumptions } from "@/lib/api-client/consumptions";
+import type { Consumption } from "@/lib/api-client/types";
+import { formatKwh } from "@/lib/format";
+import { monthName } from "@/lib/period";
+import { deleteConsumptionAction } from "./actions";
+
+export const metadata: Metadata = { title: "Liste des saisies" };
+
+// The heading renders at once; the API is read in a child inside its own <Suspense> (see the README,
+// "Pièges Next.js 16").
+export default function ConsumptionsPage() {
+  return (
+    <>
+      <h1 className="mb-6 text-2xl font-semibold">Liste des saisies</h1>
+      <Suspense fallback={<ListSkeleton />}>
+        <ConsumptionList />
+      </Suspense>
+    </>
+  );
+}
+
+async function ConsumptionList() {
+  const consumptions = await listConsumptions();
+
+  if (consumptions.length === 0) {
+    return (
+      <div className="flex flex-col items-start gap-4 rounded-lg border border-dashed border-border-input p-6">
+        <p className="text-muted-foreground">Aucune saisie pour le moment.</p>
+        <ButtonLink href="/">Saisir une consommation</ButtonLink>
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-x-auto rounded-lg border border-border bg-surface shadow-sm">
+      <table className="w-full min-w-[44rem] text-left">
+        <caption className="sr-only">Consommation en kWh par salle et par mois</caption>
+        <thead className="border-b border-border bg-background text-sm text-muted-foreground">
+          <tr>
+            <th scope="col" className="px-4 py-2 font-semibold">Salle</th>
+            <th scope="col" className="px-4 py-2 font-semibold">Mois / année</th>
+            <th scope="col" className="px-4 py-2 text-right font-semibold">Jirama (kWh)</th>
+            <th scope="col" className="px-4 py-2 text-right font-semibold">Solaire (kWh)</th>
+            <th scope="col" className="px-4 py-2 text-right font-semibold">Groupe électrogène (kWh)</th>
+            <th scope="col" className="px-4 py-2 font-semibold">
+              <span className="sr-only">Actions</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {consumptions.map((consumption) => (
+            <ConsumptionRow key={consumption.id} consumption={consumption} />
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function ConsumptionRow({ consumption }: { consumption: Consumption }) {
+  const period = `${monthName(consumption.month)} ${consumption.year}`;
+  // Names the row for screen readers: every row has the same visible "Modifier" and "Supprimer".
+  const target = `la saisie de ${consumption.roomName}, ${period}`;
+  // The entry page pre-fills the form when the room already has an entry for that month.
+  const editHref = `/consumptions/entry?roomId=${consumption.roomId}&month=${consumption.month}&year=${consumption.year}`;
+
+  return (
+    <tr className="border-t border-border first:border-t-0">
+      <th scope="row" className="px-4 py-2 font-medium">{consumption.roomName}</th>
+      <td className="px-4 py-2">{period}</td>
+      <td className="px-4 py-2 text-right">{formatKwh(consumption.jiramaKwh)}</td>
+      <td className="px-4 py-2 text-right">{formatKwh(consumption.solarKwh)}</td>
+      <td className="px-4 py-2 text-right">{formatKwh(consumption.generatorKwh)}</td>
+      <td className="px-4 py-2">
+        <div className="flex gap-2">
+          <ButtonLink href={editHref} variant="secondary">
+            Modifier<span className="sr-only"> {target}</span>
+          </ButtonLink>
+          <ConfirmDelete
+            triggerLabel="Supprimer"
+            triggerAriaLabel={`Supprimer ${target}`}
+            title="Supprimer cette saisie ?"
+            description={`Les consommations de ${consumption.roomName} pour ${period} seront supprimées. Cette action est définitive.`}
+            confirmLabel="Supprimer la saisie"
+            action={deleteConsumptionAction.bind(null, consumption.id)}
+          />
+        </div>
+      </td>
+    </tr>
+  );
+}
+
+// Same rough shape as the table (a header and a few rows), so the page does not jump.
+function ListSkeleton() {
+  return (
+    <div aria-busy="true" aria-live="polite">
+      <span className="sr-only">Chargement…</span>
+      <div aria-hidden className="flex flex-col gap-2">
+        <div className="h-10 rounded-md bg-border" />
+        <div className="h-14 rounded-md bg-border" />
+        <div className="h-14 rounded-md bg-border" />
+        <div className="h-14 rounded-md bg-border" />
+      </div>
+    </div>
+  );
+}

@@ -49,7 +49,7 @@ export async function saveConsumptionAction(
   }
 
   revalidateAllPages();
-  redirect("/");
+  redirect("/consumptions");
 }
 
 function readValues(formData: FormData): FormValues {

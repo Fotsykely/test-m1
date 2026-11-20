@@ -14,6 +14,9 @@ type ConfirmDeleteProps = {
   action: (formData: FormData) => Promise<void>;
   // Icon-only trigger for compact rows; the label stays available to screen readers.
   iconOnly?: boolean;
+  // Longer name for screen readers when the visible label is shared by several rows ("Supprimer").
+  // It should start with the visible label.
+  triggerAriaLabel?: string;
 };
 
 // A delete button that asks for confirmation in a native modal <dialog> before submitting.
@@ -24,6 +27,7 @@ export function ConfirmDelete({
   confirmLabel,
   action,
   iconOnly = false,
+  triggerAriaLabel,
 }: ConfirmDeleteProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const titleId = useId();
@@ -33,7 +37,7 @@ export function ConfirmDelete({
       <Button
         type="button"
         variant="danger"
-        aria-label={iconOnly ? triggerLabel : undefined}
+        aria-label={iconOnly ? triggerLabel : triggerAriaLabel}
         onClick={() => dialogRef.current?.showModal()}
       >
         <Trash2 aria-hidden className="size-4" />

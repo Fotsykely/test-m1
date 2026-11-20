@@ -1,4 +1,4 @@
-import { apiFetch, jsonRequest } from "./client";
+import { apiFetch, apiFetchNoContent, jsonRequest } from "./client";
 import type { Consumption, ConsumptionValues, NewConsumption } from "./types";
 
 // The entry of a room for a month, or null when none has been saved yet (there is at most one).
@@ -16,4 +16,14 @@ export function createConsumption(input: NewConsumption): Promise<Consumption> {
 // Only the values change: the room, year and month identify the entry.
 export function updateConsumption(id: number, values: ConsumptionValues): Promise<Consumption> {
   return apiFetch<Consumption>(`/api/consumptions/${id}`, jsonRequest("PUT", values));
+}
+
+// Every entry, newest period first.
+export function listConsumptions(): Promise<Consumption[]> {
+  return apiFetch<Consumption[]>("/api/consumptions");
+}
+
+// Throws ApiNotFoundError when the entry does not exist (anymore).
+export function deleteConsumption(id: number): Promise<void> {
+  return apiFetchNoContent(`/api/consumptions/${id}`, { method: "DELETE" });
 }

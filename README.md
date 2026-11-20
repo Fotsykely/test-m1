@@ -82,6 +82,8 @@ frontend/
 
 ### Pages du front
 
+Un menu dans l'en-tête (Saisie, Liste, Résultat) relie les pages ; l'entrée de la page courante est mise en évidence.
+
 | Route | Rôle |
 |---|---|
 | `/` | liste des salles : on choisit le mois (par défaut le mois courant) et l'année, puis « Saisir » sur la salle voulue |

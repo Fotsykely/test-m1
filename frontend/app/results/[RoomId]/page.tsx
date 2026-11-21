@@ -1,5 +1,4 @@
 import { listConsumptions } from "@/lib/api-client/consumptions";
-import { Suspense } from "react";
 import { ButtonLink } from "@/components/button";
 import { parseRouteId } from "@/lib/route-helpers";
 import type { YearGroup } from "@/lib/consumption-group";

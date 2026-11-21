@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { ButtonLink } from "@/components/button";
 import { parseRouteId } from "@/lib/route-helpers";
 import type { YearGroup } from "@/lib/consumption-group";
-import { groupByYear, totalMonth } from "@/lib/consumption-group";
+import { groupByYear, totalMonth, YearTotals } from "@/lib/consumption-group";
 import { formatKwh } from "@/lib/format";
 import { monthName } from "@/lib/period";
  
@@ -50,6 +50,7 @@ export async function RoomHistory({params}: {params: Props["params"]})
 
 export function YearSection({group}: {group: YearGroup})
 {
+    const yearTotals = YearTotals(group);
     return (
         <div className="mt-6">
             <table className="w-full min-w-[36rem] text-left">
@@ -66,7 +67,7 @@ export function YearSection({group}: {group: YearGroup})
                 <tbody>
                 {group.consumptions.map((consumption) => (
                     <tr key={consumption.id} className="border-t border-border first:border-t-0">
-                        <td className="px-4 py-2 text-right">{monthName(consumption.month)}</td>
+                        <td className="px-4 py-2">{monthName(consumption.month)}</td>
                         <td className="px-4 py-2 text-right">{formatKwh(consumption.jiramaKwh)}</td>
                         <td className="px-4 py-2 text-right">{formatKwh(consumption.solarKwh)}</td>
                         <td className="px-4 py-2 text-right">{formatKwh(consumption.generatorKwh)}</td>
@@ -74,6 +75,15 @@ export function YearSection({group}: {group: YearGroup})
                     </tr>
                 ))}
                 </tbody>
+                <tfoot>
+                    <tr className="border-t">
+                        <td className="px-4 py-2 font-semibold">Total {group.year}</td>
+                        <td className="px-4 py-2 text-right">{formatKwh(yearTotals.jiramaKwh)}</td>
+                        <td className="px-4 py-2 text-right">{formatKwh(yearTotals.solarKwh)}</td>
+                        <td className="px-4 py-2 text-right">{formatKwh(yearTotals.generatorKwh)}</td>
+                        <td className="px-4 py-2 text-right font-semibold">{formatKwh(yearTotals.total)}</td>
+                    </tr>
+                </tfoot>
             </table>
         </div>
     )

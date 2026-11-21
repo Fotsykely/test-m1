@@ -16,3 +16,13 @@ export function totalMonth(c: Consumption): number
 {
     return c.jiramaKwh + c.solarKwh + c.generatorKwh;
 }
+
+export function YearTotals(group: YearGroup): {jiramaKwh: number, solarKwh: number, generatorKwh: number, total: number}
+{
+    return group.consumptions.reduce((acc, c) => ({
+        jiramaKwh: acc.jiramaKwh + c.jiramaKwh,
+        solarKwh: acc.solarKwh + c.solarKwh,
+        generatorKwh: acc.generatorKwh + c.generatorKwh,
+        total: acc.total + totalMonth(c)
+    }), {jiramaKwh:0, solarKwh: 0, generatorKwh: 0, total: 0});
+}

@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Suspense } from "react";
 import { listRoomSummaries } from "@/lib/api-client/consumptions";
 import { formatKwh } from "@/lib/format";
 
-export const metadata: Metadata = { title: "Résultat" };
+export const metadata: Metadata = { title: "Résultat par salle" };
 
 // The heading renders at once; the API is read in a child inside its own <Suspense> (see the README,
 // "Pièges Next.js 16").
@@ -45,7 +46,11 @@ async function ResultsTable() {
               <td className="px-4 py-2 text-right">{formatKwh(summary.jiramaKwh)}</td>
               <td className="px-4 py-2 text-right">{formatKwh(summary.solarKwh)}</td>
               <td className="px-4 py-2 text-right">{formatKwh(summary.generatorKwh)}</td>
-              <td className="px-4 py-2 text-right font-semibold">{formatKwh(summary.totalKwh)}</td>
+              <td className="px-4 py-2 text-right font-semibold">
+                <Link href={`/results/${summary.roomId}`} className="text-primary underline">
+                  {formatKwh(summary.totalKwh)}
+                </Link>
+              </td>
             </tr>
           ))}
         </tbody>

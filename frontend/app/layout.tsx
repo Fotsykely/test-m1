@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import Link from "next/link";
 import { MainNav } from "@/components/main-nav";
+import { Suspense } from "react";
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -29,7 +30,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <Link href="/" className="text-lg font-semibold">
               Test-M1
             </Link>
-            <MainNav />
+            <Suspense fallback={<div className="min-h-11 bg-muted"/>}>
+              <MainNav />
+            </Suspense>
           </div>
         </header>
         <main id="main-content" className="mx-auto w-full max-w-5xl px-4 py-6 lg:py-10">

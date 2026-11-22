@@ -1,10 +1,9 @@
-/* eslint-disable react/no-unescaped-entities */
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { listRoomSummaries } from "@/lib/api-client/consumptions";
 import { formatKwh } from "@/lib/format";
-import { parseFilter, hasFilter } from "@/lib/consumption-filter";
+import { parseFilter } from "@/lib/consumption-filter";
 
 export const metadata: Metadata = { title: "Résultat par salle" };
 type Props = PageProps<"/results">;
@@ -13,15 +12,14 @@ type Props = PageProps<"/results">;
 // "Pièges Next.js 16").
 export default async function ResultsPage({searchParams}: {searchParams: Props["searchParams"]}) {
   const filter = parseFilter(await searchParams);
-  const filtered = hasFilter(filter);
 
   return (
     <>
       <h1 className="mb-2 text-2xl font-semibold">Résultat</h1>
       {
-        (filtered) ?
+        (filter.year !== undefined) ?
         <p className="mb-6 text-muted-foreground">
-          Consommation totale de chaque salle, sur l'année {filter.year}.
+          Consommation totale de chaque salle, sur l&apos;année {filter.year}.
         </p>
         :
         <p className="mb-6 text-muted-foreground">

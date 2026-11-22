@@ -35,6 +35,6 @@ export function deleteConsumption(id: number): Promise<void> {
 }
 
 // One row per room, with its kWh summed over every month entered (zeros for a room without entry).
-export function listRoomSummaries(): Promise<RoomSummary[]> {
-  return apiFetch<RoomSummary[]>("/api/consumptions/summary");
+export function listRoomSummaries(year: number): Promise<RoomSummary[]> {
+  return apiFetch<RoomSummary[]>(`/api/consumptions/summary?year=${year}`);
 }

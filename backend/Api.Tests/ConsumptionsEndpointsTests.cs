@@ -171,6 +171,42 @@ public class ConsumptionsEndpointsTests(ApiFactory factory)
             summary.Select(r => r.RoomName));
     }
 
+    [Fact]
+    public async Task The_summary_of_a_year_only_counts_that_year()
+    {
+        // Years 2050 and 2051 belong to this test alone, so the sums can be compared to exact values.
+        await CreateAsync(AmphiA, 2050, 1, jirama: 100, solar: 10, generator: 5);
+        await CreateAsync(AmphiA, 2050, 2, jirama: 50, solar: 0, generator: 5);
+        await CreateAsync(AmphiA, 2051, 1, jirama: 1000, solar: 1000, generator: 1000);
+
+        var of2050 = await GetSummaryAsync(2050);
+        var of2051 = await GetSummaryAsync(2051);
+
+        Assert.Equal(new RoomSummaryDto(AmphiA, "Amphi A", 150m, 10m, 10m, 170m), of2050[0]);
+        Assert.Equal(new RoomSummaryDto(AmphiA, "Amphi A", 1000m, 1000m, 1000m, 3000m), of2051[0]);
+    }
+
+    [Fact]
+    public async Task The_summary_of_a_year_lists_the_six_rooms_with_zeros_for_the_empty_ones()
+    {
+        // Nobody enters anything in 2052.
+        var summary = await GetSummaryAsync(2052);
+
+        Assert.Equal(6, summary.Count);
+        Assert.All(summary, room => Assert.Equal(new RoomSummaryDto(room.RoomId, room.RoomName, 0m, 0m, 0m, 0m), room));
+    }
+
+    [Theory]
+    [InlineData("1999")]
+    [InlineData("2101")]
+    [InlineData("abc")]
+    public async Task A_summary_year_out_of_range_or_not_a_number_answers_400(string year)
+    {
+        var response = await _client.GetAsync($"/api/consumptions/summary?year={year}");
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
     private Task<HttpResponseMessage> PostAsync(
         int roomId, int year, int month, decimal jirama, decimal solar, decimal generator) =>
         _client.PostAsJsonAsync("/api/consumptions", new
@@ -195,8 +231,8 @@ public class ConsumptionsEndpointsTests(ApiFactory factory)
     private async Task<List<ConsumptionDto>> GetListAsync(string query) =>
         (await _client.GetFromJsonAsync<List<ConsumptionDto>>($"/api/consumptions?{query}"))!;
 
-    private async Task<List<RoomSummaryDto>> GetSummaryAsync() =>
-        (await _client.GetFromJsonAsync<List<RoomSummaryDto>>("/api/consumptions/summary"))!;
+    private async Task<List<RoomSummaryDto>> GetSummaryAsync(int? year = null) =>
+        (await _client.GetFromJsonAsync<List<RoomSummaryDto>>($"/api/consumptions/summary?year={year}"))!;
 
     private static void AssertAdded(
         RoomSummaryDto before, RoomSummaryDto after, decimal jirama, decimal solar, decimal generator)

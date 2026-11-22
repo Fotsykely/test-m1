@@ -39,9 +39,14 @@ public class ConsumptionsController(AppDbContext db) : ControllerBase
     // Result table: one row per room with its kWh summed over every month entered,
     // and zeros for a room that has no entry yet.
     [HttpGet("summary")]
-    public async Task<ActionResult<List<RoomSummaryDto>>> GetSummary(CancellationToken cancellationToken)
+    public async Task<ActionResult<List<RoomSummaryDto>>> GetSummary(
+        [Range(Consumption.YearMin, Consumption.YearMax, ErrorMessage = "L'année doit être comprise entre {1} et {2}.")]
+        int? year, 
+        CancellationToken cancellationToken)
     {
-        var sumsByRoom = await db.Consumptions
+        var query = FilterByPeriod(db.Consumptions.AsNoTracking(), year, null);
+
+        var sumsByRoom = await query
             .GroupBy(c => c.RoomId)
             .Select(g => new
             {

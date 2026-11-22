@@ -1,5 +1,5 @@
 import { apiFetch, apiFetchNoContent, jsonRequest } from "./client";
-import type { Consumption, ConsumptionFilter, ConsumptionValues, NewConsumption, RoomSummary } from "./types";
+import type { Consumption, ConsumptionFilter, RoomSummaryFilter, ConsumptionValues, NewConsumption, RoomSummary } from "./types";
 
 // The entry of a room for a month, or null when none has been saved yet (there is at most one).
 export async function findConsumption(roomId: number, month: number, year: number): Promise<Consumption | null> {
@@ -35,6 +35,15 @@ export function deleteConsumption(id: number): Promise<void> {
 }
 
 // One row per room, with its kWh summed over every month entered (zeros for a room without entry).
-export function listRoomSummaries(year?: number): Promise<RoomSummary[]> {
-  return apiFetch<RoomSummary[]>(`/api/consumptions/summary?year=${year}`);
+export function listRoomSummaries(filter: RoomSummaryFilter = {}): Promise<RoomSummary[]> {
+  return apiFetch<RoomSummary[]>(summaryPath(filter));
+}
+
+export function summaryPath(filter: RoomSummaryFilter = {}): string
+{
+  const query = new URLSearchParams();
+  if (filter.year !== undefined) query.set("year", String(filter.year));
+
+  const queryString = query.toString();
+  return `/api/consumptions/summary${queryString ? `?${queryString}` : ""}`;
 }

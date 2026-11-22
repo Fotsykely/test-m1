@@ -10,7 +10,7 @@ type Props = PageProps<"/results">;
 
 // The heading renders at once; the API is read in a child inside its own <Suspense> (see the README,
 // "Pièges Next.js 16").
-export default async function ResultsPage({searchParams}: {searchParams: Props["searchParams"]}) {
+export default function ResultsPage({searchParams}: {searchParams: Props["searchParams"]}) {
 
   return (
     <>

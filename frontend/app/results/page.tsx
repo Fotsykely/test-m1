@@ -11,7 +11,20 @@ type Props = PageProps<"/results">;
 // The heading renders at once; the API is read in a child inside its own <Suspense> (see the README,
 // "Pièges Next.js 16").
 export default async function ResultsPage({searchParams}: {searchParams: Props["searchParams"]}) {
+
+  return (
+    <>
+      <Suspense fallback={<ResultsSkeleton />}>
+        <ResultsTable searchParams={searchParams}/>
+      </Suspense>
+    </>
+  );
+}
+
+// Every room has a row, with zeros when nothing has been entered for it yet.
+async function ResultsTable({searchParams}: {searchParams: Props["searchParams"]}) {
   const filter = parseFilter(await searchParams);
+  const summaries = await listRoomSummaries(filter);
 
   return (
     <>
@@ -26,48 +39,36 @@ export default async function ResultsPage({searchParams}: {searchParams: Props["
           Consommation totale de chaque salle, tous les mois saisis confondus.
         </p>
       }
-      <Suspense fallback={<ResultsSkeleton />}>
-        <ResultsTable searchParams={searchParams}/>
-      </Suspense>
-    </>
-  );
-}
-
-// Every room has a row, with zeros when nothing has been entered for it yet.
-async function ResultsTable({searchParams}: {searchParams: Props["searchParams"]}) {
-  const filter = parseFilter(await searchParams);
-  const summaries = await listRoomSummaries(filter);
-
-  return (
-    <div className="relative overflow-x-auto rounded-lg border border-border bg-surface shadow-sm">
-      <table className="w-full min-w-[36rem] text-left">
-        <caption className="sr-only">Consommation totale en kWh par salle et par type d&apos;énergie</caption>
-        <thead className="border-b border-border bg-background text-sm text-muted-foreground">
-          <tr>
-            <th scope="col" className="px-4 py-2 font-semibold">Salle</th>
-            <th scope="col" className="px-4 py-2 text-right font-semibold">Jirama (kWh)</th>
-            <th scope="col" className="px-4 py-2 text-right font-semibold">Solaire (kWh)</th>
-            <th scope="col" className="px-4 py-2 text-right font-semibold">Groupe électrogène (kWh)</th>
-            <th scope="col" className="px-4 py-2 text-right font-semibold">Total (kWh)</th>
-          </tr>
-        </thead>
-        <tbody>
-          {summaries.map((summary) => (
-            <tr key={summary.roomId} className="border-t border-border first:border-t-0">
-              <th scope="row" className="px-4 py-2 font-medium">{summary.roomName}</th>
-              <td className="px-4 py-2 text-right">{formatKwh(summary.jiramaKwh)}</td>
-              <td className="px-4 py-2 text-right">{formatKwh(summary.solarKwh)}</td>
-              <td className="px-4 py-2 text-right">{formatKwh(summary.generatorKwh)}</td>
-              <td className="px-4 py-2 text-right font-semibold">
-                <Link href={`/results/${summary.roomId}`} className="text-primary underline">
-                  {formatKwh(summary.totalKwh)}
-                </Link>
-              </td>
+      <div className="relative overflow-x-auto rounded-lg border border-border bg-surface shadow-sm">
+        <table className="w-full min-w-[36rem] text-left">
+          <caption className="sr-only">Consommation totale en kWh par salle et par type d&apos;énergie</caption>
+          <thead className="border-b border-border bg-background text-sm text-muted-foreground">
+            <tr>
+              <th scope="col" className="px-4 py-2 font-semibold">Salle</th>
+              <th scope="col" className="px-4 py-2 text-right font-semibold">Jirama (kWh)</th>
+              <th scope="col" className="px-4 py-2 text-right font-semibold">Solaire (kWh)</th>
+              <th scope="col" className="px-4 py-2 text-right font-semibold">Groupe électrogène (kWh)</th>
+              <th scope="col" className="px-4 py-2 text-right font-semibold">Total (kWh)</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {summaries.map((summary) => (
+              <tr key={summary.roomId} className="border-t border-border first:border-t-0">
+                <th scope="row" className="px-4 py-2 font-medium">{summary.roomName}</th>
+                <td className="px-4 py-2 text-right">{formatKwh(summary.jiramaKwh)}</td>
+                <td className="px-4 py-2 text-right">{formatKwh(summary.solarKwh)}</td>
+                <td className="px-4 py-2 text-right">{formatKwh(summary.generatorKwh)}</td>
+                <td className="px-4 py-2 text-right font-semibold">
+                  <Link href={`/results/${summary.roomId}`} className="text-primary underline">
+                    {formatKwh(summary.totalKwh)}
+                  </Link>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 }
 

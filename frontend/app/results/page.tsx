@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { listRoomSummaries } from "@/lib/api-client/consumptions";
 import { formatKwh } from "@/lib/format";
 import { parseFilter } from "@/lib/consumption-filter";
+import { YearFilterForm } from "@/app/results/_components/year-filter-form";
 
 export const metadata: Metadata = { title: "Résultat par salle" };
 type Props = PageProps<"/results">;
@@ -39,6 +40,10 @@ async function ResultsTable({searchParams}: {searchParams: Props["searchParams"]
           Consommation totale de chaque salle, tous les mois saisis confondus.
         </p>
       }
+
+      {/* filter form */}
+      <YearFilterForm  key={filter.year ?? 'all'}  year = {filter.year} />
+
       <div className="relative overflow-x-auto rounded-lg border border-border bg-surface shadow-sm">
         <table className="w-full min-w-[36rem] text-left">
           <caption className="sr-only">Consommation totale en kWh par salle et par type d&apos;énergie</caption>

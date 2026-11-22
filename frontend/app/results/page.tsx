@@ -14,6 +14,7 @@ export default function ResultsPage({searchParams}: {searchParams: Props["search
 
   return (
     <>
+      <h1 className="mb-2 text-2xl font-semibold">Résultat</h1>
       <Suspense fallback={<ResultsSkeleton />}>
         <ResultsTable searchParams={searchParams}/>
       </Suspense>
@@ -28,7 +29,6 @@ async function ResultsTable({searchParams}: {searchParams: Props["searchParams"]
 
   return (
     <>
-      <h1 className="mb-2 text-2xl font-semibold">Résultat</h1>
       {
         (filter.year !== undefined) ?
         <p className="mb-6 text-muted-foreground">

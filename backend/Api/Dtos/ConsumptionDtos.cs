@@ -100,3 +100,11 @@ public record RoomSummaryDto(
     decimal SolarKwh,
     decimal GeneratorKwh,
     decimal TotalKwh);
+
+public record YearSummaryDto(
+    int year,
+    decimal JiramaKwh,
+    decimal SolarKwh,
+    decimal GeneratorKwh,
+    decimal TotalKwh
+);

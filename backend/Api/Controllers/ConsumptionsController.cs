@@ -65,6 +65,31 @@ public class ConsumptionsController(AppDbContext db) : ControllerBase
             : new RoomSummaryDto(room.Id, room.Name, 0, 0, 0, 0));
     }
 
+    [HttpGet("summary/{roomId:int}/years")]
+    public async Task<ActionResult<List<YearSummaryDto>>> GetSummaryPerYear(
+    int roomId, CancellationToken cancellationToken)
+    {
+        if (!await db.Rooms.AnyAsync(r => r.Id == roomId, cancellationToken))
+            return NotFound();
+
+        var sums = await db.Consumptions
+            .AsNoTracking()
+            .Where(c => c.RoomId == roomId)
+            .GroupBy(c => c.Year)
+            .Select(g => new
+            {
+                Year = g.Key,
+                Jirama = g.Sum(c => c.JiramaKwh),
+                Solar = g.Sum(c => c.SolarKwh),
+                Generator = g.Sum(c => c.GeneratorKwh),
+            })
+            .OrderByDescending(s => s.Year)
+            .ToListAsync(cancellationToken);
+
+        return sums.ConvertAll(s => new YearSummaryDto(
+            s.Year, s.Jirama, s.Solar, s.Generator, s.Jirama + s.Solar + s.Generator));
+    }
+
     [HttpGet("{id:int}")]
     public async Task<ActionResult<ConsumptionDto>> GetById(int id, CancellationToken cancellationToken)
     {
